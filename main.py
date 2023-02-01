@@ -77,35 +77,61 @@ class UserDatabase:
 
 
 class LoginScreen:
+    # Initialize class with a database parameter
     def __init__(self, database):
+        # Assign the database parameter to self.database
         self.database = database
 
+    # Define the run method for the LoginScreen class
     def run(self):
+        # Input prompt for the username
         username = input("Username: ")
+        # Get the user from the database using the entered username
         user = self.database.get_user(username)
+        # If the user is not found in the database
         if user is None:
+            # Prompt the user to create a new account or exit
             create = input(f"No user '{username}' found. Create a new user? (y/n) ")
+            # If the user chooses to create a new account
             if create.lower() == "y":
+                # Input prompts for password and confirmation
                 password = input("Password: ")
                 password2 = input("Confirm password: ")
+                # If the passwords don't match, print an error message
                 if password != password2:
                     print("Passwords do not match.")
+                # If the create_user method returns True
                 elif self.database.create_user(username, password):
+                    # Print a success message and get the user from the database again
                     print("User created.")
                     user = self.database.get_user(username)
+                # If the create_user method returns False
                 else:
+                    # Print an error message
                     print("User creation failed.")
+            # If the user chooses not to create a new account
             else:
+                # Print a goodbye message and return
                 print("Goodbye.")
                 return
+        # If the user is found in the database
         else:
+            # Input prompt for the password
             password = input("Password: ")
+            # Check if the entered password matches the user's password
             if not user.check_password(password):
+                # Print an error message if the password is incorrect
                 print("Incorrect password.")
+            # If the password is correct
             else:
+                # Print a success message
                 print("Login successful.")
 
+# If the script is being run as the main program
 if __name__ == "__main__":
+    # Initialize the database with a file path
     database = UserDatabase("app/scores.csv")
+    # Initialize the LoginScreen class with the database
     login_screen = LoginScreen(database)
+    # Run the login screen
     login_screen.run()
