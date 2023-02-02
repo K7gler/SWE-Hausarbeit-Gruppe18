@@ -1,84 +1,134 @@
 import pygame
+import time
 import random
 
 pygame.init()
 
-width, height = 500, 500
-cell_size = 20
-cols, rows = width//cell_size, height//cell_size
-
-black = (0, 0, 0)
+# Colors
 white = (255, 255, 255)
+yellow = (255, 255, 102)
+black = (0, 0, 0)
+red = (213, 50, 80)
+green = (0, 255, 0)
+blue = (50, 153, 213)
 
-screen = pygame.display.set_mode((width, height))
+# Screen dimensions
+dis_width = 600
+dis_height = 400
 
-pygame.display.set_caption('Snake Game')
+dis = pygame.display.set_mode((dis_width, dis_height))
+pygame.display.update()
 
-class Snake:
-    def __init__(self):
-        self.x = cols//2
-        self.y = rows//2
-        self.body = [(self.x, self.y)]
-        self.dir_x = 0
-        self.dir_y = -1
+clock = pygame.time.Clock()
 
-    def update(self):
-        self.x += self.dir_x
-        self.y += self.dir_y
-        self.body.insert(0, (self.x, self.y))
-        self.body.pop()
+# Font for displaying score
+font_style = pygame.font.SysFont(None, 30)
 
-    def change_direction(self, dir_x, dir_y):
-        self.dir_x = dir_x
-        self.dir_y = dir_y
+def our_snake(block_size, snake_list):
+    for x,y in snake_list:
+        pygame.draw.rect(dis, yellow, [x, y, block_size, block_size])
 
-    def grow(self):
-        self.body.insert(0, (self.x, self.y))
+def message(msg, color):
+    mesg = font_style.render(msg, True, color)
+    dis.blit(mesg, [dis_width/6, dis_height/3])
 
-    def draw(self, screen, cell_size):
-        for x, y in self.body:
-            pygame.draw.rect(screen, white, (x*cell_size, y*cell_size, cell_size, cell_size))
+def gameLoop():
+    game_over = False
+    game_close = False
 
-class Food:
-    def __init__(self):
-        self.x = random.randint(0, cols-1)
-        self.y = random.randint(0, rows-1)
+    # Initial position of the snake
+    x1 = dis_width / 2
+    y1 = dis_height / 2
 
-    def draw(self, screen, cell_size):
-        pygame.draw.rect(screen, white, (self.x*cell_size, self.y*cell_size, cell_size, cell_size))
+    # Initial velocity
+    x1_change = 0
+    y1_change = 0
 
-snake = Snake()
-food = Food()
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                snake.change_direction(0, -1)
-            if event.key == pygame.K_DOWN:
-                snake.change_direction(0, 1)
-            if event.key == pygame.K_LEFT:
-                snake.change_direction(-1, 0)
-            if event.key == pygame.K_RIGHT:
-                snake.change_direction(1, 0)
-        if snake.x == food.x and snake.y == food.y:
-            snake.grow()
-            food = Food()
-        if snake.x < 0 or snake.x > cols-1 or snake.y < 0 or snake.y > rows-1:
-            running = False
-        
-        for i in range(1, len(snake.body)):
-            if snake.x == snake.body[i][0] and snake.y == snake.body[i][1]:
-                running = False
+    # Snake block size
+    block_size = 10
 
-        snake.update()
-        screen.fill(black)
+    # List to keep track of all the blocks in the snake
+    snake_List = []
+    Length_of_snake = 1
 
-        snake.draw(screen, cell_size)
-        food.draw(screen, cell_size)
+    # Food position
+    foodx = round(random.randrange(0, dis_width - block_size) / 10.0) * 10.0
+    foody = round(random.randrange(0, dis_height - block_size) / 10.0) * 10.0
 
+    # Main game loop
+    while not game_over:
+
+        while game_close == True:
+            dis.fill(black)
+            message("You Lost! Press Q-Quit or C-Play Again", red)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+                game_close = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_change = -block_size
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_change = block_size
+                    y1_change = 0
+                elif event.key == pygame.K_UP:
+                    y1_change = -block_size
+                    x1_change = 0
+                elif event.key == pygame.K_DOWN:
+                    y1_change = block_size
+                    x1_change = 0
+
+        # Moving the snake by updating the x and y coordinates
+        x1 += x1_change
+        y1 += y1_change
+
+        # Adding a black background to the display window
+        dis.fill(white)
+
+        # Displaying the food
+        pygame.draw.rect(dis, green, [foodx, foody, block_size, block_size])
+
+        # Adding the snake to the display
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+        if len(snake_List) > Length_of_snake:
+            del snake_List[0]
+
+        for x,y in snake_List[:-1]:
+            if x == snake_Head[0] and y == snake_Head[1]:
+                game_close = True
+
+        # Drawing the snake and updating the display
+        our_snake(block_size, snake_List)
         pygame.display.update()
 
-pygame.quit()
+        # Checking if the snake hits the boundry
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
+
+        # Checking if the snake eats the food
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, dis_width - block_size) / 10.0) * 10.0
+            foody = round(random.randrange(0, dis_height - block_size) / 10.0) * 10.0
+            Length_of_snake += 1
+
+        clock.tick(10)
+
+    # Deactivating pygame library
+    pygame.quit()
+
+# Starting the game
+gameLoop()
