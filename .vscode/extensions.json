@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "gencay.vscode-chatgpt"
+        "gencay.vscode-chatgpt",
+        "github.copilot"
     ]
 }
