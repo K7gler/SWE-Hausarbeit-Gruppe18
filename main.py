@@ -1,15 +1,26 @@
-# login class
-class Login:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-        self.login = False
+# user class
+class User:
+    def __init__(self, username, password, highscore_1, highscore_2):
+        self.username = username 
+        self.password = password 
+        self.highscore_1 = highscore_1 
+        self.highscore_2 = highscore_2
+    
 
-    def login(self):
-        if self.username == "admin" and self.password == "admin":
-            self.login = True
-        else:
-            self.login = False
+class UserManagement:
+    def __init__(self):
+        self.users = []
+        self.load_users()
 
-    def get_login(self):
-        return self.login
+    def load_users(self):
+        with open('app/scores.csv', 'r') as f:
+            for line in f:
+                username, password, highscore_1, highscore_2 = line.strip().split(',')
+                self.users.append(User(username, password, highscore_1, highscore_2))
+
+    def save_users(self):
+        with open('app/scores.csv', 'w') as f:
+            for user in self.users:
+                f.write(f'{user.username},{user.password},{user.highscore_1},{user.highscore_2}
+
+        
