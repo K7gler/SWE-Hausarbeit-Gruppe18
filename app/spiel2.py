@@ -29,9 +29,11 @@ class Snake(object):
         self.width = width
         self.height = height
         self.vel = 10
+        self.body = [(x, y)]
         
     def draw(self, screen, color):
-        pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
+        for x, y in self.body:
+            pygame.draw.rect(screen, color, (x, y, self.width, self.height))        
         
 # Food class
 class Food(object):
@@ -44,7 +46,7 @@ class Food(object):
     def draw(self, screen, color):
         pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
 
-# Main game loop
+# Main Game loop
 def game_loop():
     # Initializing snake and food objects
     snake = Snake(250, 250, 10, 10)
@@ -78,14 +80,20 @@ def game_loop():
             snake.y -= snake.vel
         if keys[pygame.K_DOWN]:
             snake.y += snake.vel
+        snake.body = [(snake.x, snake.y)] + snake.body[:-1]
         snake.draw(screen, green)
-        
+
         # Redrawing food and checking for collision with snake
         food.draw(screen, red)
-        if snake.x == food.x and snake.y == food.y:
-            # Increasing score and creating new food object
-            score += 1
-            food = Food(random.randint(0, window_size[0]-10), random.randint(0, window_size[1]-10), 10, 10)
+
+        for x, y in snake.body:
+            if x == food.x and y == food.y:
+                # Increasing score and creating new food object
+                score += 1
+                snake.body.append(snake.body[-1])
+                food = Food(random.randint(0, window_size[0]-10), random.randint(0, window_size[1]-10), 10, 10)
+                break
+            
         # Displaying score on screen
         score_text = font.render("Score: " + str(score), True, white)
         screen.blit(score_text, [0, 0])

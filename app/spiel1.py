@@ -29,9 +29,13 @@ class Snake(object):
         self.width = width
         self.height = height
         self.vel = 10
+        self.snake_list = [(x, y)]
+        self.direction = "right"
         
     def draw(self, screen, color):
-        pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
+        for pos in self.snake_list:
+            pygame.draw.rect(screen, color, (pos[0], pos[1], self.width, self.height))
+
         
 # Food class
 class Food(object):
@@ -69,22 +73,48 @@ def game_loop():
         screen.fill(black)
         
         # Moving snake and redrawing
-        keys = pygame.key.get_pressed()
+        keys = pygame.key.get_pressed()        
         if keys[pygame.K_LEFT]:
-            snake.x -= snake.vel
+            snake.direction = "left"
         if keys[pygame.K_RIGHT]:
-            snake.x += snake.vel
+            snake.direction = "right"
         if keys[pygame.K_UP]:
-            snake.y -= snake.vel
+            snake.direction = "up"
         if keys[pygame.K_DOWN]:
+            snake.direction = "down"
+            
+        if snake.direction == "left":
+            snake.x -= snake.vel
+        if snake.direction == "right":
+            snake.x += snake.vel
+        if snake.direction == "up":
+            snake.y -= snake.vel
+        if snake.direction == "down":
             snake.y += snake.vel
+        
+        # Checking for collision with window borders
+        if snake.x < 0 or snake.x > window_size[0] or snake.y < 0 or snake.y > window_size[1]:
+            run = False
+            break
+         
+        # Checking for collision with snake body 
+        snake.snake_list.pop(0)
+        snake.snake_list.append((snake.x, snake.y))
+        if (snake.x, snake.y) in snake.snake_list[:-1]:
+            run = False
+            break
         snake.draw(screen, green)
+        
         
         # Redrawing food and checking for collision with snake
         food.draw(screen, red)
-        if snake.x == food.x and snake.y == food.y:
+        food.draw(screen, red)
+        snake_rect = pygame.Rect(snake.x, snake.y, snake.width, snake.height)
+        food_rect = pygame.Rect(food.x, food.y, food.width, food.height)
+        if snake_rect.colliderect(food_rect):
             # Increasing score and creating new food object
             score += 1
+            snake.snake_list.append((snake.x, snake.y))
             food = Food(random.randint(0, window_size[0]-10), random.randint(0, window_size[1]-10), 10, 10)
         # Displaying score on screen
         score_text = font.render("Score: " + str(score), True, white)
