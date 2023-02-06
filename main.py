@@ -65,7 +65,7 @@ class User:
             writer.writerows(rows)
 
 def main():
-    print("Welcome to the score tracking app.")
+    print("Welcome to your game center!")
     while True:
         print("1. Login")
         print("2. Create an account")
