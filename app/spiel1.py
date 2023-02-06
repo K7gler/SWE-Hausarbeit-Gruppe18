@@ -122,7 +122,8 @@ def game_loop():
         
         # Updating screen
         pygame.display.update()
-        
+    # Return Score 
+    return score    
     # Quitting game
     pygame.quit()
 
