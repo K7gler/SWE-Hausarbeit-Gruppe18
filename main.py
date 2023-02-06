@@ -42,7 +42,27 @@ class User:
                     return True
         return False
 
+    def update_highscore(self, game_score_1, game_score_2):
+        # update highscore_1 with game_score_1 if game_score_1 is greater than highscore_1
+        if game_score_1 > self.highscore_1:
+            self.highscore_1 = game_score_1
+        # update highscore_2 with game_score_2 if game_score_2 is greater than highscore_2
+        if game_score_2 > self.highscore_2:
+            self.highscore_2 = game_score_2
 
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            rows = list(reader)
+        
+        for i, row in enumerate(rows):
+            if row[0] == self.username:
+                # update the highscores for the user in the csv file
+                rows[i][2] = self.highscore_1
+                rows[i][3] = self.highscore_2
+        
+        with open("app/scores.csv", "w", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(rows)
 
 def main():
     print("Welcome to the score tracking app.")
@@ -54,16 +74,22 @@ def main():
         if choice == 1:
             username = input("Enter your username: ")
             password = input("Enter your password: ")
-            user = User.login(username, password)
+            user = User.login(username, password)    
             if user:
                 print(f"Welcome back, {username}! Your highscores are {user.highscore_1} and {user.highscore_2}.")
                 print(f"1. Game1 - Highscore: {user.highscore_1}")
                 print(f"2. Game2 - Highscore: {user.highscore_2}")
                 choose_game = int(input("Choose: which game you want to play?"))
                 if choose_game == 1:
-                    exec(open("app/spiel1.py").read(), globals())
+                    import app.spiel1
+                    game_score_1 = app.spiel1.game_loop()
+                    user.update_highscore(game_score_1, 0)
+
                 elif choose_game == 2:
-                    exec(open("app/spiel2.py").read(), globals())                               
+                    import app.spiel2
+                    game_score_2 = app.spiel2.game_loop()
+                    user.update_highscore(0, game_score_2)
+               
             else:
                 print("Login failed. Invalid username or password.")
         elif choice == 2:
