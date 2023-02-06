@@ -1,26 +1,81 @@
-# user class
+import hashlib
+import csv
+ 
 class User:
-    def __init__(self, username, password, highscore_1, highscore_2):
-        self.username = username 
-        self.password = password 
-        self.highscore_1 = highscore_1 
+    def __init__(self, username, password_hash, highscore_1, highscore_2):
+        self.username = username
+        self.password_hash = password_hash
+        self.highscore_1 = highscore_1
         self.highscore_2 = highscore_2
-    
 
-class UserManagement:
-    def __init__(self):
-        self.users = []
-        self.load_users()
+    def get_hash(password):
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        return password_hash
 
-    def load_users(self):
-        with open('app/scores.csv', 'r') as f:
-            for line in f:
-                username, password, highscore_1, highscore_2 = line.strip().split(',')
-                self.users.append(User(username, password, highscore_1, highscore_2))
+    def create_account(username, password):
+        if User.is_username_taken(username):
+            return "Username is already in use."
 
-    def save_users(self):
-        with open('app/scores.csv', 'w') as f:
-            for user in self.users:
-                f.write(f'{user.username},{user.password},{user.highscore_1},{user.highscore_2}
+        password_hash = User.get_hash(password)
+        # Write the username, password hash, and initial highscores to the CSV file
+        with open("app/scores.csv", "a", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([username, password_hash, 0, 0])
+            return "Account created successfully."
 
-        
+    def login(username, password):
+        password_hash = User.get_hash(password)
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row[0] == username and row[1] == password_hash:
+                    # Return the highscores if the username and password hash match
+                    return User(username, password_hash, int(row[2]), int(row[3]))
+        # User was not found
+        return None
+
+    def is_username_taken(username):
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row[0] == username:
+                    return True
+        return False
+
+
+
+def main():
+    print("Welcome to the score tracking app.")
+    while True:
+        print("1. Login")
+        print("2. Create an account")
+        print("3. Quit")
+        choice = int(input("Enter your choice: "))
+        if choice == 1:
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+            user = User.login(username, password)
+            if user:
+                print(f"Welcome back, {username}! Your highscores are {user.highscore_1} and {user.highscore_2}.")
+                print(f"1. Game1 - Highscore: {user.highscore_1}")
+                print(f"2. Game2 - Highscore: {user.highscore_2}")
+                choose_game = int(input("Choose: which game you want to play?"))
+                if choose_game == 1:
+                    exec(open("app/spiel1.py").read(), globals())
+                elif choose_game == 2:
+                    exec(open("app/spiel2.py").read(), globals())                               
+            else:
+                print("Login failed. Invalid username or password.")
+        elif choice == 2:
+            username = input("Enter a username: ")
+            if User.is_username_taken(username):
+                print("Username is already taken. Please choose a different one.")
+                continue
+            password = input("Enter a password: ")
+            result = User.create_account(username, password)
+            print(result)
+        else:
+            break
+
+if __name__ == '__main__':
+    main()

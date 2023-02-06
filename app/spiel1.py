@@ -1,7 +1,7 @@
 import pygame
 import random
 
-# Initializing game window
+# Initializing game window1
 pygame.init()
 
 # Setting window size
