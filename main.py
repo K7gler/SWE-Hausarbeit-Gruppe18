@@ -3,18 +3,27 @@ import csv
  
 class User:
     def __init__(self, username, password_hash, highscore_1, highscore_2):
+        """
+        Initialize a User instance with the given username, password hash, and high scores.
+        """
         self.username = username
         self.password_hash = password_hash
         self.highscore_1 = highscore_1
         self.highscore_2 = highscore_2
 
-    # hashing method
+    @staticmethod
     def get_hash(password):
+        """
+        Hash the given password using SHA-256.
+        """
         password_hash = hashlib.sha256(password.encode()).hexdigest()
         return password_hash
 
-    # new account method
+    @staticmethod
     def create_account(username, password):
+        """
+        Create a new user account if the username is not already taken.
+        """
         if User.is_username_taken(username):
             return "Username is already in use."
 
@@ -24,19 +33,12 @@ class User:
             writer = csv.writer(csvfile)
             writer.writerow([username, password_hash, 0, 0])
             return "Account created successfully."
-    # login method (checks CSV if username and password hash match + returns highscores)
-    def login(username, password):
-        password_hash = User.get_hash(password)
-        with open("app/scores.csv", "r") as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                if row[0] == username and row[1] == password_hash:
-                    # Return the highscores if the username and password hash match
-                    return User(username, password_hash, int(row[2]), int(row[3]))
-        # User was not found
-        return None
-    # checks if username is already taken
+
+    @staticmethod
     def is_username_taken(username):
+        """
+        Check if the given username is already taken.
+        """
         with open("app/scores.csv", "r") as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
@@ -44,12 +46,26 @@ class User:
                     return True
         return False
 
-    # updating highscores method (checks if new score is higher than old score and updates CSV file)
+    @staticmethod
+    def login(username, password):
+        """
+        Log in with the given username and password and return the corresponding User instance.
+        """
+        password_hash = User.get_hash(password)
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row[0] == username and row[1] == password_hash:
+                    # Return the User instance if the username and password hash match
+                    return User(username, password_hash, int(row[2]), int(row[3]))
+        # User was not found
+        return None
+
     def update_highscore(self, game_score_1, game_score_2):
-        # update highscore_1 with game_score_1 if game_score_1 is greater than highscore_1
+        # update highscore_1 
         if game_score_1 > self.highscore_1:
             self.highscore_1 = game_score_1
-        # update highscore_2 with game_score_2 if game_score_2 is greater than highscore_2
+        # update highscore_2 
         if game_score_2 > self.highscore_2:
             self.highscore_2 = game_score_2
 
@@ -66,6 +82,8 @@ class User:
         with open("app/scores.csv", "w", newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(rows)
+
+
 
 
 # mainfunction 
