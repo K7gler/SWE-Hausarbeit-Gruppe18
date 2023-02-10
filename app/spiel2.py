@@ -116,7 +116,8 @@ class Tetris:
         if self.intersects():
             self.figure.y -= 1
             self.freeze()
-# # Diese Funktion wird ausgeführt, sobald der Block den unteren Rand erreicht.
+            
+#  Diese Funktion wird ausgeführt, sobald der Block den unteren Rand erreicht.
     def freeze(self):
         for i in range(4):
             for j in range(4):
