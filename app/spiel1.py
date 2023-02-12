@@ -79,11 +79,14 @@ class Food(object):
 # Game class
 class Game:
     score_value = 0
-    def __init__(self, snake, food, clock, score):
-        self.snake = snake
-        self.food = food
+    def __init__(self, screen, clock):
+        self.screen = screen
         self.clock = clock
-        self.score = score
+        self.snake = Snake(250, 250, 10, 10)
+        self.food = Food(round(random.randrange(0, window_size[0] - 10) / 10.0) * 10.0, 
+                         round(random.randrange(0, window_size[1] - 10) / 10.0) * 10.0, 
+                         10, 10)
+        self.score = 0
 
     @classmethod
     def transfer_score(cls):
@@ -93,63 +96,56 @@ class Game:
         snake_rect = pygame.Rect(self.snake.x, self.snake.y, self.snake.width, self.snake.height)
         food_rect = pygame.Rect(self.food.x, self.food.y, self.food.width, self.food.height)
         return snake_rect.colliderect(food_rect)
-        
+
     def update_snake_position(self):
         self.snake.move(pygame.key.get_pressed())
         self.snake.snake_list.append((self.snake.x, self.snake.y))
-        
+
     def update_food_position(self):
         if self.check_collision():
             self.food.x = round(random.randrange(0, window_size[0] - self.food.width) / 10.0) * 10.0
             self.food.y = round(random.randrange(0, window_size[1] - self.food.height) / 10.0) * 10.0
             self.score += 10
             self.snake.vel += 2
-            
-    def update_score(self, screen, color):
+
+    def update_score(self, color):
         text = Font.get_font().render("Score: " + str(self.score), True, color)
-        screen.blit(text, [0,0])
-        
+        self.screen.blit(text, [0, 0])
+
     def update_snake_length(self):
         if not self.check_collision():
             self.snake.snake_list.pop(0)
-    
-def game_loop(screen, clock):
-    # Initialize snake and food
-    snake = Snake(250, 250, 10, 10)
-    food = Food(round(random.randrange(0, window_size[0] - 10) / 10.0) * 10.0, 
-                round(random.randrange(0, window_size[1] - 10) / 10.0) * 10.0, 
-                10, 10)
-    game = Game(snake, food, clock, 0)
-    
-    run = True
-    while run:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+
+    def game_loop(self):
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+
+            self.screen.fill(Colors.white)
+            self.update_snake_position()
+            if self.snake.check_collision_with_borders(window_size[0], window_size[1]):
                 run = False
-                
-        screen.fill(Colors.white)
-        game.update_snake_position()
-        if snake.check_collision_with_borders(window_size[0], window_size[1]):
-            run = False
-        game.update_food_position()        
-        game.update_score(screen, Colors.black)
-        snake.draw(screen, Colors.black)
-        food.draw(screen, Colors.red)
+            self.update_food_position()
+            self.update_score(Colors.black)
+            self.snake.draw(self.screen, Colors.black)
+            self.food.draw(self.screen, Colors.red)
+            pygame.display.update()
+            self.clock.tick(30)
+            self.update_snake_length()
+
+        # Prepare score for transfer
+        Game.score_value = self.score
+
+        # Display score
+        self.screen.fill(Colors.white)
+        text = Font.get_font().render("Your score: " + str(self.score), True, Colors.black)
+        self.screen.blit(text, [window_size[0]/2 - 50, window_size[1]/2])
         pygame.display.update()
-        clock.tick(30)        
-        game.update_snake_length()
-    # Prepare score for transfer
-    Game.score_value = game.score
+        pygame.time.wait(3000)
 
-    # Display score
-    screen.fill(Colors.white)
-    text = Font.get_font().render("Your score: " + str(game.score), True, Colors.black)
-    screen.blit(text, [window_size[0]/2 - 50, window_size[1]/2])
-    pygame.display.update()
-    pygame.time.wait(3000)  
-    
-       
-        
-    pygame.quit()
+# Create an instance of the Game class and call game_loop() method
+game = Game(screen, pygame.time.Clock())
+game.game_loop()
 
-game_loop(screen, pygame.time.Clock())
