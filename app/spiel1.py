@@ -1,7 +1,7 @@
 import pygame
 import random
 
-# Initializing game window1
+# Initializing game windo
 pygame.init()
 
 # Setting window size
@@ -108,10 +108,6 @@ class Game:
         if not self.check_collision():
             self.snake.snake_list.pop(0)
     
-    def run_game_and_return_score():
-        return Game.score
-
-
 def game_loop(screen, clock):
     # Initialize snake and food
     snake = Snake(250, 250, 10, 10)
@@ -137,8 +133,18 @@ def game_loop(screen, clock):
         pygame.display.update()
         clock.tick(30)        
         game.update_snake_length()
+    # Save score in class variable
+    score = game.get_score()
+
+    # Display score
+    screen.fill(Colors.white)
+    text = Font.get_font().render("Your score: " + str(score), True, Colors.black)
+    screen.blit(text, [window_size[0]/2 - 50, window_size[1]/2])
+    pygame.display.update()
+    pygame.time.wait(3000)  
+    
        
-    game.run_game_and_return_score()     
+        
     pygame.quit()
     
     

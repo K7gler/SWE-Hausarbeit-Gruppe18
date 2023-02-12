@@ -109,8 +109,9 @@ def main():
                 choose_game = int(input("Choose: which game you want to play?"))
                 if choose_game == 1:
                     # Import game1 and run it
-                    import app.spiel1
-                    game_score_1 = app.spiel1.game_loop()
+                    import app.spiel1                    
+                    game_score_1 = app.spiel1.Game.get_score()
+                    print(game_score_1)
                     user.update_highscore(game_score_1, 0)
 
                 elif choose_game == 2:
