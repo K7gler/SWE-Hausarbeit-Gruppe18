@@ -78,11 +78,16 @@ class Food(object):
 
 # Game class
 class Game:
+    score_value = 0
     def __init__(self, snake, food, clock, score):
         self.snake = snake
         self.food = food
         self.clock = clock
         self.score = score
+
+    @classmethod
+    def transfer_score(cls):
+        return cls.score_value
 
     def check_collision(self):
         snake_rect = pygame.Rect(self.snake.x, self.snake.y, self.snake.width, self.snake.height)
@@ -133,12 +138,12 @@ def game_loop(screen, clock):
         pygame.display.update()
         clock.tick(30)        
         game.update_snake_length()
-    # Save score in class variable
-    score = game.get_score()
+    # Prepare score for transfer
+    Game.score_value = game.score
 
     # Display score
     screen.fill(Colors.white)
-    text = Font.get_font().render("Your score: " + str(score), True, Colors.black)
+    text = Font.get_font().render("Your score: " + str(game.score), True, Colors.black)
     screen.blit(text, [window_size[0]/2 - 50, window_size[1]/2])
     pygame.display.update()
     pygame.time.wait(3000)  
@@ -146,6 +151,5 @@ def game_loop(screen, clock):
        
         
     pygame.quit()
-    
-    
+
 game_loop(screen, pygame.time.Clock())

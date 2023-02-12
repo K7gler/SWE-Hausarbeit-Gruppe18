@@ -1,6 +1,7 @@
 import hashlib
 import csv
- 
+import pygame
+
 class User:
     def __init__(self, username, password_hash, highscore_1, highscore_2):
         """
@@ -83,55 +84,122 @@ class User:
             writer = csv.writer(csvfile)
             writer.writerows(rows)
 
+class GameCenter:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((400, 300))
+        self.font = pygame.font.Font(None, 30)
+
+    def run(self):
+        self.show_welcome_screen()
+        while True:
+            # Handle events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        # Login
+                        username = self.get_input("Enter your username:")
+                        password = self.get_input("Enter your password:")
+                        user = User.login(username, password)
+                        if user:
+                            self.show_highscores(user)
+                            self.show_game_select(user)
+                        else:
+                            self.show_error("Login failed. Invalid username or password.")
+                    elif event.key == pygame.K_2:
+                        # Create an account
+                        username = self.get_input("Enter a username:")
+                        if User.is_username_taken(username):
+                            self.show_error("Username is already taken. Please choose a different one.")
+                            continue
+                        password = self.get_input("Enter a password:")
+                        result = User.create_account(username, password)
+                        self.show_message(result)
+                    elif event.key == pygame.K_3:
+                        pygame.quit()
+                        return
+
+    def get_input(self, prompt):
+        self.show_message(prompt)
+        input_text = ""
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return input_text
+                    elif event.key == pygame.K_BACKSPACE:
+                        input_text = input_text[:-1]
+                    else:
+                        input_text += event.unicode
+            self.show_message(prompt + input_text)
 
 
+    def show_welcome_screen(self):
+        text = self.font.render("Welcome to your game center!", True, (255, 255, 255))
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(text, (50, 100))
+        text = self.font.render("1. Login", True, (255, 255, 255))
+        self.screen.blit(text, (50, 150))
+        text = self.font.render("2. Create an account", True, (255, 255, 255))
+        self.screen.blit(text, (50, 200))
+        text = self.font.render("3. Quit", True, (255, 255, 255))
+        self.screen.blit(text, (50, 250))
+        pygame.display.update()
 
-# mainfunction 
-def main():
-    print("Welcome to your game center!")
-    # Loop until the user quits 
-    while True:
-        print("1. Login")
-        print("2. Create an account")
-        print("3. Quit")
-        # Get the user's choice
-        choice = int(input("Enter your choice: "))
-        if choice == 1:
-            username = input("Enter your username: ")
-            password = input("Enter your password: ")
-            # Try to login the user
-            user = User.login(username, password)    
-            if user:
-                # If the login was successful, print the highscores and ask the user which game they want to play
-                print(f"Welcome back, {username}! Your highscores are {user.highscore_1} and {user.highscore_2}.")
-                print(f"1. Game1 - Highscore: {user.highscore_1}")
-                print(f"2. Game2 - Highscore: {user.highscore_2}")
-                choose_game = int(input("Choose: which game you want to play?"))
-                if choose_game == 1:
-                    # Import game1 and run it
-                    import app.spiel1                    
-                    game_score_1 = app.spiel1.Game.get_score()
-                    print(game_score_1)
-                    user.update_highscore(game_score_1, 0)
+    def show_highscores(self, user):
+        self.screen.fill((0, 0, 0))
+        text = self.font.render(f"Welcome back, {user.username}!", True, (255, 255, 255))
+        self.screen.blit(text, (50, 100))
+        text = self.font.render(f"Your highscores are {user.highscore_1} and {user.highscore_2}.", True, (255, 255, 255))
+        self.screen.blit(text, (50, 150))
+        pygame.display.update()
 
-                elif choose_game == 2:
-                    # Import game2 and run it
-                    import app.spiel2
-                    game_score_2 = app.spiel2.game_loop()
-                    user.update_highscore(0, game_score_2)               
-            else:
-                print("Login failed. Invalid username or password.")
-        # Create a new account
-        elif choice == 2:
-            username = input("Enter a username: ")
-            if User.is_username_taken(username):
-                print("Username is already taken. Please choose a different one.")
-                continue
-            password = input("Enter a password: ")
-            result = User.create_account(username, password)
-            print(result)
-        else:
-            break
+    def show_game_select(self, user):
+        self.screen.fill((0, 0, 0))
+        text = self.font.render(f"1. Game1 - Highscore: {user.highscore_1}", True, (255, 255, 255))
+        self.screen.blit(text, (50, 100))
+        text = self.font.render(f"2. Game2 - Highscore: {user.highscore_2}", True, (255, 255, 255))
+        self.screen.blit(text, (50, 150))
+        pygame.display.update()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        import app.spiel1                    
+                        game_score_1 = app.spiel1.Game.transfer_score() # get score	
+                        user.update_highscore(game_score_1, 0)
+                        self.show_highscores(user)
+                        self.show_game_select(user)
+                        return
+                    elif event.key == pygame.K_2:
+                        import app.spiel2
+                        game_score_2 = app.spiel2.game.transfer_score() # get score
+                        user.update_highscore(0, game_score_2)
+                        self.show_highscores(user)
+                        self.show_game_select(user)
+                        return
+
+    def show_message(self, message):
+        self.screen.fill((0, 0, 0))
+        text = self.font.render(message, True, (255, 255, 255))
+        self.screen.blit(text, (50, 150))
+        pygame.display.update()
+
+    def show_error(self, message):
+        self.screen.fill((255, 0, 0))
+        text = self.font.render(message, True, (255, 255, 255))
+        self.screen.blit(text, (50, 150))
+        pygame.display.update()
 
 if __name__ == '__main__':
-    main()
+    game_center = GameCenter()
+    game_center.run()
