@@ -51,6 +51,7 @@ class Figure:
 class Tetris:
     level = 1
     score = 0
+    export_score = 0
     state = "start"
     field = []
     height = 0
@@ -235,6 +236,7 @@ while not done:
     screen.blit(text, [300,0])
     if game.state == "game_over":
         screen.blit(text_game_over, [150, 250])
+        Tetris.export_score = game.score
 
 
     pygame.display.flip()
@@ -242,3 +244,5 @@ while not done:
     clock.tick(fps)
 
 pygame.init()
+
+print(Tetris.export_score)

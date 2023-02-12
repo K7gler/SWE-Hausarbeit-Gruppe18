@@ -82,7 +82,7 @@ def game_loop():
             snake.direction = "up"
         if keys[pygame.K_DOWN]:
             snake.direction = "down"
-            
+          
         if snake.direction == "left":
             snake.x -= snake.vel
         if snake.direction == "right":
@@ -121,11 +121,11 @@ def game_loop():
         screen.blit(score_text, [0, 0])
         
         # Updating screen
-        pygame.display.update()
-    # Return Score 
-    return score    
+        pygame.display.update()        
     # Quitting game
     pygame.quit()
 
 # Running game loop
 game_loop()
+
+print(str(score))
