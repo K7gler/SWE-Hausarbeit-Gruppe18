@@ -105,7 +105,6 @@ class GameCenter:
 						password = self.get_input("Enter your password:")
 						user = User.login(username, password)
 						if user:
-							self.show_highscores(user)
 							self.show_game_select(user)
 						else:
 							self.show_error("Login failed. Invalid username or password.")
@@ -177,15 +176,12 @@ class GameCenter:
 						import app.spiel1
 						game_score_1 = app.spiel1.Game.transfer_score() # get score	
 						user.update_highscore(game_score_1, 0)
-						self.show_highscores(user)
-						self.show_game_select(user)
 						return
+						                        
 					elif event.key == pygame.K_2:
 						import app.spiel2
-						game_score_2 = app.spiel2.game.transfer_score() # get score
+						game_score_2 = app.spiel2.Tetris.transfer_score(self) # get score
 						user.update_highscore(0, game_score_2)
-						self.show_highscores(user)
-						self.show_game_select(user)
 						return
 					elif event.key == pygame.K_3:
 						pygame.quit()
