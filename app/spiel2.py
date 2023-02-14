@@ -155,7 +155,7 @@ RED = (255, 0, 0)
 # size
 screen = pygame.display.set_mode((620, 600))
 
-pygame.display.set_caption("Tetris by Josue and Ida")
+pygame.display.set_caption("Tetris ")
 
 
 done = False
