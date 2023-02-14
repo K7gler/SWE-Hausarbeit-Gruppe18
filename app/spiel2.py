@@ -73,6 +73,8 @@ class Tetris:
                 new_line.append(0)
             self.field.append(new_line)
 
+    def transfer_score(self):
+        return game.score
 # neu Form der Tetris Blöck erstellen
     def new_figure(self):
         self.figure = Figure(3, 0) # an Koordinaten(3,0) positionnieren
@@ -155,7 +157,7 @@ RED = (255, 0, 0)
 # size
 screen = pygame.display.set_mode((620, 600))
 
-pygame.display.set_caption("Tetris ")
+pygame.display.set_caption("Tetris by Josue and Ida")
 
 
 done = False
@@ -229,16 +231,16 @@ while not done:
     font = pygame.font.SysFont('Calibri', 25, True, False)
     font1 = pygame.font.SysFont('Calibri', 65, True, False)
     text = font.render("Score: " + str(game.score), True,   "Black")
+    score_value = game.score 
     text_game_over = font1.render(("game_over"),True, (255, 125, 0))
 
-
+    
     screen.blit(text, [300,0])
     if game.state == "game_over":
         screen.blit(text_game_over, [150, 250])
-
-
+        break
+    
     pygame.display.flip()
-
     clock.tick(fps)
 
-pygame.init()
+pygame.quit()
