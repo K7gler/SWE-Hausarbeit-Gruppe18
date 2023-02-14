@@ -1,161 +1,136 @@
-from turtle import update
-import pygame
+import hashlib
+import csv
+ 
+class User:
+    def __init__(self, username, password_hash, highscore_1, highscore_2):
+        """
+        Initialize a User instance with the given username, password hash, and high scores.
+        """
+        self.username = username
+        self.password_hash = password_hash
+        self.highscore_1 = highscore_1
+        self.highscore_2 = highscore_2
 
-color = pygame.Color
+    @staticmethod
+    def get_hash(password):
+        """
+        Hash the given password using SHA-256.
+        """
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        return password_hash
 
-#set the colors
-BLUE = color("blue")
-RED = color("red")
-GREEN = color("green")
-WHITE = color("white")
-BLACK = color("black")
-# set the speed of the frames
-FPS = 60
+    @staticmethod
+    def create_account(username, password):
+        """
+        Create a new user account if the username is not already taken.
+        """
+        if User.is_username_taken(username):
+            return "Username is already in use."
 
-class TextBox(pygame.Rect):
-    
-    #initialize the attributes of the text box
-    def __init__(self,*args) -> None:
-        super().__init__(*args)
-        self.text = ""  
-        self.textBox = Font.render(self.text,True,WHITE)
-        self.active = False
-        self.hover = False
-        self.activeColor,self.hoverColor,self.normalColor = GREEN,RED,BLUE
-    #set the colors
-    def setColors(self,active,hover,normal):
-        self.activeColor = active
-        self.hoverColor = hover
-        self.normalColor = normal
-    #set the title
-    def setTitle(self,title):
-        self.title = title
-        self.titleBox = titleFont.render(self.title,True,WHITE)
-    #get the colors based on activities
-    def get_color(self):
-        return self.activeColor if self.active else self.normalColor if not self.hover else self.hoverColor
+        password_hash = User.get_hash(password)
+        # Write the username, password hash, and initial highscores to the CSV file
+        with open("app/scores.csv", "a", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([username, password_hash, 0, 0])
+            return "Account created successfully."
 
-    def on_click(self,otherBox):
-        if not self.collidepoint(mouse.get_pos()):
-            self.active = False
-            return
-        if otherBox.active:
-            otherBox.active = False
-        self.active = True
-    
-    def on_hover(self):
-        if not self.collidepoint(mouse.get_pos()):
-            self.hover = False
-            return
-        self.hover = True
-    #update the text
-    def update_text(self,event):
-        if self.active:
-            if event.key == pygame.K_BACKSPACE:
-                self.text = self.text[:-1]
-                self.textBox = Font.render(self.text,True,WHITE)
+    @staticmethod
+    def is_username_taken(username):
+        """
+        Check if the given username is already taken.
+        """
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row[0] == username:
+                    return True
+        return False
 
-                return
-            if self.w > self.textBox.get_width() + 10:
-                self.text += event.unicode
-        self.textBox = Font.render(self.text,True,WHITE)
-    #renders text and rects on screen
-    def render(self):
-        pygame.draw.rect(window,self.get_color(),self,2)
-        window.blit(self.textBox,(self.x+5,self.y+10))
-        window.blit(self.titleBox,(self.x,self.y-40))
+    @staticmethod
+    def login(username, password):
+        """
+        Log in with the given username and password and return the corresponding User instance.
+        """
+        password_hash = User.get_hash(password)
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row[0] == username and row[1] == password_hash:
+                    # Return the User instance if the username and password hash match
+                    return User(username, password_hash, int(row[2]), int(row[3]))
+        # User was not found
+        return None
 
+    def update_highscore(self, game_score_1, game_score_2):
+        # update highscore_1 
+        if game_score_1 > self.highscore_1:
+            self.highscore_1 = game_score_1
+        # update highscore_2 
+        if game_score_2 > self.highscore_2:
+            self.highscore_2 = game_score_2
 
-
-class PassBox(TextBox):
-
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
-        self.starText = ""
-    
-    def update_text(self,event):
-        if self.active:
-            if event.key == pygame.K_BACKSPACE:
-                self.text = self.text[:-1]
-                self.starText = "*" * len(self.text)
-                self.textBox = Font.render(self.starText,True,WHITE)
-                return
-            if self.w > self.textBox.get_width() + 10:
-                self.text += event.unicode
-            
-        self.starText = "*" * len(self.text)
-        self.textBox = Font.render(self.starText,True,WHITE)
+        # update the csv file with the new highscores
+        with open("app/scores.csv", "r") as csvfile:
+            reader = csv.reader(csvfile)
+            rows = list(reader)
+        
+        for i, row in enumerate(rows):
+            if row[0] == self.username:        
+                rows[i][2] = self.highscore_1
+                rows[i][3] = self.highscore_2
+        
+        with open("app/scores.csv", "w", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(rows)
 
 
-pygame.init()
-
-Font = pygame.font.Font(None,28)
-titleFont = pygame.font.Font(None,32)
-
-SPECIAL_KEYS = (pygame.K_ESCAPE,pygame.K_RETURN,pygame.K_DELETE,pygame.K_TAB,pygame.K_CAPSLOCK,
-                pygame.K_LSHIFT,pygame.K_RSHIFT,pygame.K_LCTRL,pygame.K_RCTRL)
-
-display = pygame.display
-
-WIDTH,HEIGHT = 600,600
-
-window = display.set_mode((WIDTH,HEIGHT))
-display.set_caption("Login")
-
-mouse = pygame.mouse
-
-pygame.key.set_repeat(320)
 
 
+# mainfunction 
 def main():
-    open = True
+    print("Welcome to your game center!")
+    # Loop until the user quits 
+    while True:
+        print("1. Login")
+        print("2. Create an account")
+        print("3. Quit")
+        # Get the user's choice
+        choice = int(input("Enter your choice: "))
+        if choice == 1:
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+            # Try to login the user
+            user = User.login(username, password)    
+            if user:
+                # If the login was successful, print the highscores and ask the user which game they want to play
+                print(f"Welcome back, {username}! Your highscores are {user.highscore_1} and {user.highscore_2}.")
+                print(f"1. Game1 - Highscore: {user.highscore_1}")
+                print(f"2. Game2 - Highscore: {user.highscore_2}")
+                choose_game = int(input("Choose a game: "))
+                if choose_game == 1:
+                    # Import game1 and run it
+                    import app.spiel1
+                    game_score_1 = app.spiel1.Game.score_value
+                    user.update_highscore(game_score_1, 0)
 
-    user_box = TextBox(200,200,200,40)
-    user_box.setTitle("Benutzername")
+                elif choose_game == 2:
+                    # Import game2 and run it
+                    import app.spiel2
+                    game_score_2 = app.spiel2.score_value
+                    user.update_highscore(0, game_score_2)               
+            else:
+                print("Login failed. Invalid username or password.")
+        # Create a new account
+        elif choice == 2:
+            username = input("Enter a username: ")
+            if User.is_username_taken(username):
+                print("Username is already taken. Please choose a different one.")
+                continue
+            password = input("Enter a password: ")
+            result = User.create_account(username, password)
+            print(result)
+        else:
+            break
 
-    pass_box = PassBox(200,300,200,40)
-    pass_box.setTitle("Passwort")
-
-    clock = pygame.time.Clock()
-
-    while open:
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    open = False
-                    pygame.quit()
-                    return
-                case pygame.MOUSEBUTTONUP:
-                    user_box.on_click(pass_box)
-                    pass_box.on_click(user_box)          
-
-                case pygame.MOUSEMOTION:
-                    user_box.on_hover()
-                    pass_box.on_hover()  
-                
-                case pygame.KEYUP:
-                    pass
-                    if event.key == pygame.K_ESCAPE:
-                        user_box.active = False
-                        pass_box.active = False
-                
-                case pygame.KEYDOWN:
-                    if event.key in SPECIAL_KEYS:
-                        continue
-                    
-                    user_box.update_text(event)
-                    pass_box.update_text(event)
-
-        window.fill(BLACK)
-        user_box.render()
-        pass_box.render()
-        display.update()
-
-                    
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-else:
-    raise Exception("This file doesnt support imports. Please run the file itself with 'python main.py'")
