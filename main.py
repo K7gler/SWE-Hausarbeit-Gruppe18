@@ -92,9 +92,7 @@ class GameCenter:
 
 	def run(self):
 		self.show_welcome_screen()
-		while True:
-			# Handle events
-			for event in pygame.event.get():
+		for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
 					return
@@ -106,6 +104,7 @@ class GameCenter:
 						user = User.login(username, password)
 						if user:
 							self.show_game_select(user)
+							break
 						else:
 							self.show_error("Login failed. Invalid username or password.")
 					elif event.key == pygame.K_2:
@@ -117,9 +116,12 @@ class GameCenter:
 						password = self.get_input("Enter a password:")
 						result = User.create_account(username, password)
 						self.show_message(result)
+						break
 					elif event.key == pygame.K_3:
 						pygame.quit()
-						return
+						return True
+
+		
 
 	def get_input(self, prompt):
 		self.show_message(prompt)
@@ -166,8 +168,7 @@ class GameCenter:
 		text = self.font.render(f"2. Game2 - Highscore: {user.highscore_2}", True, (255, 255, 255))
 		self.screen.blit(text, (50, 150))
 		pygame.display.update()
-		while True:
-			for event in pygame.event.get():
+		for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
 					return
@@ -176,16 +177,17 @@ class GameCenter:
 						import app.spiel1
 						game_score_1 = app.spiel1.Game.transfer_score() # get score	
 						user.update_highscore(game_score_1, 0)
-						return
-						                        
+						break
 					elif event.key == pygame.K_2:
 						import app.spiel2
-						game_score_2 = app.spiel2.Tetris.transfer_score(self) # get score
+						game_score_2 = app.spiel2.game.transfer_score() # get score
 						user.update_highscore(0, game_score_2)
-						return
+						break
 					elif event.key == pygame.K_3:
 						pygame.quit()
+						done = True
 						return
+			
 
 
 	def show_message(self, message):
@@ -201,5 +203,7 @@ class GameCenter:
 		pygame.display.update()
 
 if __name__ == '__main__':
-	game_center = GameCenter()
-	game_center.run()
+	done = False
+	while not done:
+		game_center = GameCenter()
+		game_center.run()
