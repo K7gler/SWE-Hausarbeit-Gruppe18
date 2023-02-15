@@ -1,7 +1,7 @@
 import pygame
 import random
 
-# Initializing game window1
+# Initializing game window
 pygame.init()
 
 # Setting window size
@@ -9,7 +9,7 @@ window_size = (500, 500)
 screen = pygame.display.set_mode(window_size)
 
 # Setting window title
-pygame.display.set_caption("Pygame Snake Game")
+pygame.display.set_caption("Snake")
 
 # Define colors as class variables
 class Colors:
@@ -99,7 +99,9 @@ class Game:
             self.food.x = round(random.randrange(0, window_size[0] - self.food.width) / 10.0) * 10.0
             self.food.y = round(random.randrange(0, window_size[1] - self.food.height) / 10.0) * 10.0
             self.score += 10
-            self.snake.vel += 2
+            self.snake.vel += 1
+            self.snake.snake_list.append(self.snake.snake_list[-1])
+            
             
     def update_score(self, screen, color):
         text = Font.get_font().render("Score: " + str(self.score), True, color)
@@ -109,9 +111,6 @@ class Game:
         if not self.check_collision():
             self.snake.snake_list.pop(0)
     
-    def return_score():
-        return game.score
-
 
 def game_loop(screen, clock):
     # Initialize snake and food
