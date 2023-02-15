@@ -11,13 +11,14 @@ screen = pygame.display.set_mode(window_size)
 # Setting window title
 pygame.display.set_caption("Snake")
 
-# Define colors as class variables
-class Colors:
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
+# Define colors as dictionary items
+colors = {
+    "white": (255, 255, 255),
+    "black": (0, 0, 0),
+    "red": (255, 0, 0),
+    "green": (0, 255, 0),
+    "blue": (0, 0, 255)
+}
 
 # Setting font for text as static class variable
 class Font:
@@ -129,14 +130,14 @@ def game_loop(screen, clock):
             if event.type == pygame.QUIT:
                 run = False
                 
-        screen.fill(Colors.white)
+        screen.fill(colors["black"])
         game.update_snake_position()
         if snake.check_collision_with_borders(window_size[0], window_size[1]):
             run = False
         game.update_food_position()        
-        game.update_score(screen, Colors.black)
-        snake.draw(screen, Colors.black)
-        food.draw(screen, Colors.red)
+        game.update_score(screen, colors["green"])
+        snake.draw(screen, colors["green"])
+        food.draw(screen, colors["red"])
         pygame.display.update()
         clock.tick(30)        
         game.update_snake_length()
