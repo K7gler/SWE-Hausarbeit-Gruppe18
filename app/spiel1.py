@@ -26,13 +26,21 @@ class Font:
     def get_font():
         return Font.font
 
-# Snake class
-class Snake(object):
+# Base class for game objects
+class GameObject:
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
+        
+    def draw(self, screen, color):
+        pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
+
+# Snake class inherits from GameObject
+class Snake(GameObject):
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height)
         self.vel = 5
         self.snake_list = [(x, y)]
         self.direction = "right"
@@ -65,13 +73,10 @@ class Snake(object):
             return True
         return False
 
-# Food class
-class Food(object):
+# Food class inherits from GameObject
+class Food(GameObject):
     def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        super().__init__(x, y, width, height)
         
     def draw(self, screen, color):
         pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
@@ -102,7 +107,6 @@ class Game:
             self.snake.vel += 1
             self.snake.snake_list.append(self.snake.snake_list[-1])
             
-            
     def update_score(self, screen, color):
         text = Font.get_font().render("Score: " + str(self.score), True, color)
         screen.blit(text, [0,0])
@@ -111,7 +115,6 @@ class Game:
         if not self.check_collision():
             self.snake.snake_list.pop(0)
     
-
 def game_loop(screen, clock):
     # Initialize snake and food
     snake = Snake(250, 250, 10, 10)
@@ -138,9 +141,7 @@ def game_loop(screen, clock):
         clock.tick(30)        
         game.update_snake_length()
        
-    
     pygame.quit()
     Game.score_value = game.score
-    
-    
+
 game_loop(screen, pygame.time.Clock())
