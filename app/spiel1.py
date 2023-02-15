@@ -134,7 +134,9 @@ class Game:
             pygame.display.update()
             self.clock.tick(30)
             self.update_snake_length()
-        return self.score
+
+        # Prepare score for transfer
+        Game.score_value = self.score
 
         # Display score
         self.screen.fill(Colors.white)
@@ -142,9 +144,8 @@ class Game:
         self.screen.blit(text, [window_size[0]/2 - 50, window_size[1]/2])
         pygame.display.update()
         pygame.time.wait(3000)
+        pygame.quit()
 
 # Create an instance of the Game class and call game_loop() method
 game = Game(screen, pygame.time.Clock())
 game.game_loop()
-
-
