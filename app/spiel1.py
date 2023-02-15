@@ -1,17 +1,17 @@
 import pygame
 import random
 
-# Initializing game window
+# Initialisierung von Pygame
 pygame.init()
 
-# Setting window size
+# Fenstergröße und Fenster erstellen
 window_size = (500, 500)
 screen = pygame.display.set_mode(window_size)
 
-# Setting window title
+# Titel des Fensters
 pygame.display.set_caption("Snake")
 
-# Define colors as dictionary items
+# Farben als Dictionary definieren 
 colors = {
     "white": (255, 255, 255),
     "black": (0, 0, 0),
@@ -20,14 +20,14 @@ colors = {
     "blue": (0, 0, 255)
 }
 
-# Setting font for text as static class variable
+# Font als statische Klasse definieren
 class Font:
     font = pygame.font.Font(None, 25)
     @staticmethod
     def get_font():
         return Font.font
 
-# Base class for game objects
+# Basisklasse für alle Spiel-Objekte 
 class GameObject:
     def __init__(self, x, y, width, height):
         self.x = x
@@ -38,7 +38,7 @@ class GameObject:
     def draw(self, screen, color):
         pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
 
-# Snake class inherits from GameObject
+# Snake Klasse erbt von GameObject
 class Snake(GameObject):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height)
@@ -74,7 +74,7 @@ class Snake(GameObject):
             return True
         return False
 
-# Food class inherits from GameObject
+# Food Klasse erbt von GameObject
 class Food(GameObject):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height)
@@ -82,7 +82,7 @@ class Food(GameObject):
     def draw(self, screen, color):
         pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
 
-# Game class
+# Die Klasse Game definiert das Spielverhalten
 class Game:
     score_value = 0
     def __init__(self, snake, food, clock, score):
@@ -117,7 +117,6 @@ class Game:
             self.snake.snake_list.pop(0)
     
 def game_loop(screen, clock):
-    # Initialize snake and food
     snake = Snake(250, 250, 10, 10)
     food = Food(round(random.randrange(0, window_size[0] - 10) / 10.0) * 10.0, 
                 round(random.randrange(0, window_size[1] - 10) / 10.0) * 10.0, 
